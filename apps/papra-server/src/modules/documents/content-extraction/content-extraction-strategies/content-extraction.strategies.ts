@@ -1,4 +1,5 @@
 import { buildAzureDiContentExtractionStrategy } from './azure-di/azure-di.content-extraction-strategy';
+import { buildGeminiMarkdownContentExtractionStrategy } from '../gemini-markdown.strategy';
 import type { ContentExtractionStrategyName } from './content-extraction-strategies.constants';
 import type { ContentExtractionStrategyFactory } from './content-extraction-strategies.types';
 import { buildCustomHttpContentExtractionStrategy } from './custom-http/custom-http.content-extraction-strategy';
@@ -7,6 +8,7 @@ import { buildLectureContentExtractionStrategy } from './lecture/lecture.content
 import { buildMistralOcrContentExtractionStrategy } from './mistral-ocr/mistral-ocr.content-extraction-strategy';
 
 export const strategiesRegistry = {
+  'gemini-markdown': buildGeminiMarkdownContentExtractionStrategy,
   'internal': buildLectureContentExtractionStrategy,
   'mistral-ocr': buildMistralOcrContentExtractionStrategy,
   'docling': buildDoclingContentExtractionStrategy,

@@ -1,4 +1,5 @@
 export const CONTENT_EXTRACTION_STRATEGIES = {
+  geminiMarkdown: 'gemini-markdown',
   internal: 'internal',
   mistralOcr: 'mistral-ocr',
   docling: 'docling',
