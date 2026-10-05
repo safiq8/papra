@@ -5,7 +5,7 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import { env } from 'node:process';
 import unoCssPlugin from 'unocss/vite';
-import { defineConfig } from 'vite';
+import { defineConfig, normalizePath } from 'vite';
 import solidPlugin from 'vite-plugin-solid';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
 
@@ -21,12 +21,12 @@ export default defineConfig({
     viteStaticCopy({
       targets: [
         {
-          src: path.join(pdfjsAssetsDirectory, 'cmaps'),
+          src: normalizePath(path.join(pdfjsAssetsDirectory, 'cmaps')),
           dest: 'pdfjs-assets/cmaps',
           rename: { stripBase: true },
         },
         {
-          src: path.join(pdfjsAssetsDirectory, 'standard_fonts'),
+          src: normalizePath(path.join(pdfjsAssetsDirectory, 'standard_fonts')),
           dest: 'pdfjs-assets/standard_fonts',
           rename: { stripBase: true },
         },
