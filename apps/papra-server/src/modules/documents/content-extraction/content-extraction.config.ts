@@ -1,5 +1,6 @@
 import type { AppConfigDefinition } from '../../config/config.types';
 import * as v from 'valibot';
+import { geminiMarkdownConfig } from './gemini-markdown.config';
 import { mistralOcrConfig } from './content-extraction-strategies/mistral-ocr/mistral-ocr.content-extraction-strategy.config';
 import {
   CONTENT_EXTRACTION_STRATEGIES,
@@ -12,6 +13,7 @@ import { customHttpConfig } from './content-extraction-strategies/custom-http/cu
 export const documentContentExtractionConfig = {
   extractionStrategies: {
     doc: [
+      '`gemini-markdown`: Transcribes original PDFs and images into structured Markdown with Gemini; other formats are extracted internally and structured with Gemini. Requires GEMINI_API_KEY. Maximum file size: 20 MB. Use this strategy alone to avoid falling back to plain text when OCR fails.',
       `Content extraction strategy, it can be a single strategy name like \`${CONTENT_EXTRACTION_STRATEGIES.internal}\`, or a comma-separated list of strategy names, in order of preference, like \`${[CONTENT_EXTRACTION_STRATEGIES.mistralOcr, CONTENT_EXTRACTION_STRATEGIES.internal].join(',')}\`. The first strategy that can extract text from the document will be used, and if a strategy fails processing a document, the next one will try. Available strategies are:`,
       `- \`${CONTENT_EXTRACTION_STRATEGIES.internal}\`: Uses the internal \`lecture\` library to extract text from documents, which support all common document formats and uses Tesseract for OCR. This strategy is always available, great to use as a fallback when other strategies fail.`,
       `- \`${CONTENT_EXTRACTION_STRATEGIES.mistralOcr}\`: Uses the Mistral OCR API to extract text from documents. This strategy requires a valid Mistral API key.`,
@@ -29,6 +31,7 @@ export const documentContentExtractionConfig = {
     default: CONTENT_EXTRACTION_STRATEGIES.internal,
   },
   strategy: {
+    geminiMarkdown: geminiMarkdownConfig,
     mistralOcr: mistralOcrConfig,
     docling: doclingConfig,
     azureDi: azureDiConfig,
