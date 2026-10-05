@@ -1,10 +1,11 @@
 import type { Component } from 'solid-js';
 import type { Document } from '../documents.types';
 import { useMutation, useQueryClient } from '@tanstack/solid-query';
-import { createSignal, Show } from 'solid-js';
+import DOMPurify from 'dompurify';
+import { marked } from 'marked';
+import { createMemo, createSignal, Show } from 'solid-js';
 import { useConfig } from '@/modules/config/config.provider';
 import { useI18n } from '@/modules/i18n/i18n.provider';
-import { cn } from '@/modules/shared/style/cn';
 import { Alert, AlertDescription } from '@/modules/ui/components/alert';
 import { Button } from '@/modules/ui/components/button';
 import { createToast } from '@/modules/ui/components/sonner';
@@ -21,6 +22,23 @@ export const DocumentContentEditionPanel: Component<{ document: Document }> = (p
 
   const [isEditing, setIsEditing] = createSignal(false);
   const [getContent, setContent] = createSignal(props.document.content);
+  const renderedContent = createMemo(() =>
+    DOMPurify.sanitize(marked.parse(props.document.content ?? '', { async: false })),
+  );
+
+  const downloadMarkdown = () => {
+    const url = URL.createObjectURL(
+      new Blob([props.document.content ?? ''], { type: 'text/markdown;charset=utf-8' }),
+    );
+    const link = document.createElement('a');
+    link.href = url;
+    const name = props.document.name
+      .replace(/\.[^.]+$/, '')
+      .replace(/[<>:"/\\|?*\u0000-\u001F]/g, '_');
+    link.download = `${name || 'document'}.md`;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
 
   const updateMutation = useMutation(() => ({
     mutationFn: async ({ content }: { content: string }) =>
@@ -57,20 +75,41 @@ export const DocumentContentEditionPanel: Component<{ document: Document }> = (p
 
   return (
     <div class="flex flex-col gap-2">
-      <TextFieldRoot>
-        <TextArea
-          value={isEditing() ? getContent() : props.document.content}
-          onInput={(e) => setContent(e.currentTarget.value)}
-          class={cn('font-mono placeholder:italic max-h-500px', {
-            'bg-muted text-muted-foreground': !isEditing(),
-          })}
-          readonly={!isEditing()}
-          placeholder={t('documents.content.empty-placeholder')}
-          rows={2}
-          autoResize
-        />
-      </TextFieldRoot>
+      <Show
+        when={isEditing()}
+        fallback={
+          <Show
+            when={props.document.content}
+            fallback={
+              <p class="text-muted-foreground italic">{t('documents.content.empty-placeholder')}</p>
+            }
+          >
+            <div
+              class="markdown-content rounded-md border p-4 max-h-500px overflow-auto break-words"
+              innerHTML={renderedContent()}
+            />
+          </Show>
+        }
+      >
+        <TextFieldRoot>
+          <TextArea
+            value={isEditing() ? getContent() : props.document.content}
+            onInput={(e) => setContent(e.currentTarget.value)}
+            class="font-mono placeholder:italic max-h-500px"
+            readonly={!isEditing()}
+            placeholder={t('documents.content.empty-placeholder')}
+            rows={2}
+            autoResize
+          />
+        </TextFieldRoot>
+      </Show>
       <div class="flex flex-wrap justify-end gap-2">
+        <Show when={!isEditing()}>
+          <Button variant="outline" onClick={downloadMarkdown} disabled={!props.document.content}>
+            <div class="i-tabler-download size-4 mr-2" />
+            Download .md
+          </Button>
+        </Show>
         <Show
           when={config.documents.isReprocessingEnabled && !props.document.isDeleted && !isEditing()}
         >
